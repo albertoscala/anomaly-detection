@@ -18,7 +18,7 @@ Si progetti un semplice sistema di anomaly detection per uno stream di dati. Il 
 ## Instructions
 
 Per farlo funzionare devi prima scaricare il progetto usando github desktop.
-Successivamente ti scarichi il dataset da questo link: https://drive.google.com/file/d/1bWWsa7J1ttX_Muz-zIAD1P2BW-Zg0VeX/view?usp=drive_link
+Successivamente ti scarichi il dataset da questo link: https://drive.google.com/file/d/1SkUmfyLaMH99D9Ym1-eY3FLJ8RmvykHN/view?usp=drive_link
 
 Una volta scaricato il dataset, lo devi mettere nella cartella `dataset` del progetto.
 
