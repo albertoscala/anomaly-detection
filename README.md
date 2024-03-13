@@ -23,6 +23,6 @@ Successivamente ti scarichi il dataset da questo link: https://drive.google.com/
 Una volta scaricato il dataset, lo devi mettere nella cartella `dataset` del progetto.
 
 Nel file zip ci sono dei file csv:
-1. `data857489168.csv` è il file dataset completo
+1. `dataset_clean.csv` è il file dataset completo
 2. gli altri è il dataset spezzetato per comodità
 

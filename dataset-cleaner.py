@@ -19,6 +19,8 @@ def rebuild_dataset(dataset_dir):
 
     df[sensors] = values
 
+    df.to_csv('dataset/dataset_clean.csv', index=False)
+
     return df
 
 
