@@ -1,4 +1,5 @@
 #include <iostream>
+#include "test-generator.hpp"
 using namespace std;
 
 int getWindowSize(int argc, char **argv) {
@@ -22,5 +23,21 @@ int main(int argc, char **argv) {
     
     cout << "Window size: " << windowSize << endl;
 
+    // Create a TestGenerator object
+    TestGenerator testGenerator("dataset/dataset_clean.csv", "localhost", 6379);
+
+    cout << "TestGenerator object created" << endl;
+
+    // Read the dataset
+    testGenerator.readDataset();
+
+    cout << "Dataset read" << endl;
+
+    // Load the dataset into Redis
+    testGenerator.loadDataset();
+
+    cout << "Dataset loaded" << endl;
+
+    // Let's hope for the best -_-"
     return 0;
 }
