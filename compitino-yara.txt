@@ -16,3 +16,7 @@ Quello che devi fare è:
     (Tipo come funzionava GO)
 
 Buon lavoro :))
+
+Fai l'interfaccia per il db che deve essere postgreSQL
+
+Poi la converto io in classe tranquilla :))
