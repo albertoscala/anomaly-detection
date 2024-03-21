@@ -1,12 +1,10 @@
 #include "test-generator.hpp"
 
 // Constructor
-TestGenerator::TestGenerator(string datasetPath, Redis database) {
+TestGenerator::TestGenerator(string datasetPath, Redis& database) : database(database) {
     // Set dataset path
     this->datasetPath = datasetPath;
     
-    // Set redis database
-    this->database = database;
 }
 
 // Destructor

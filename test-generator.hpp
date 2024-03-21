@@ -13,10 +13,10 @@ class TestGenerator {
     private:
         string datasetPath;
         list<string> lines;
-        Redis database;
+        Redis& database;
     public:
         // Constructor
-        TestGenerator(string datasetPath, Redis database);
+        TestGenerator(string datasetPath, Redis& database);
 
         // Destructor
         ~TestGenerator();

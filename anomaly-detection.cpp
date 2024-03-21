@@ -1,4 +1,5 @@
 #include <iostream>
+#include "redis.hpp"
 #include "test-generator.hpp"
 using namespace std;
 
@@ -23,8 +24,11 @@ int main(int argc, char **argv) {
     
     cout << "Window size: " << windowSize << endl;
 
+    // Create redis database
+    Redis database = Redis("localhost", 6379);
+
     // Create a TestGenerator object
-    TestGenerator testGenerator("dataset/dataset_clean.csv", "localhost", 6379);
+    TestGenerator testGenerator("dataset/dataset_clean.csv", database);
 
     cout << "TestGenerator object created" << endl;
 
