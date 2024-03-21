@@ -5,7 +5,7 @@
 #include <string>
 #include <fstream>
 #include <list>
-#include <hiredis/hiredis.h>
+#include "redis.hpp"
 
 using namespace std;
 
@@ -13,10 +13,10 @@ class TestGenerator {
     private:
         string datasetPath;
         list<string> lines;
-        redisContext* connection;
+        Redis database;
     public:
         // Constructor
-        TestGenerator(string datasetPath, string hostname, int port);
+        TestGenerator(string datasetPath, Redis database);
 
         // Destructor
         ~TestGenerator();

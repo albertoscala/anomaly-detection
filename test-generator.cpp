@@ -1,18 +1,17 @@
 #include "test-generator.hpp"
 
 // Constructor
-TestGenerator::TestGenerator(string datasetPath, string hostname, int port) {
+TestGenerator::TestGenerator(string datasetPath, Redis database) {
     // Set dataset path
     this->datasetPath = datasetPath;
     
-    // Connect to Redis server
-    this->connection = redisConnect(hostname.c_str(), port);
+    // Set redis database
+    this->database = database;
 }
 
 // Destructor
 TestGenerator::~TestGenerator() {
-    // Free Redis connection
-    redisFree(this->connection);
+    // End of the function
 }
 
 void TestGenerator::readDataset() {
@@ -46,18 +45,13 @@ void TestGenerator::readDataset() {
 void TestGenerator::loadDataset() {
 
     // Iterate through the list of lines
-    for (auto line : this->lines) {
+    int lineIndex = 1;
+    for (string line : this->lines) {
         // Add line to Redis list
-        redisReply* reply = (redisReply*)redisCommand(connection, "LPUSH dataset %s", line.c_str());
+        this->database.setData(to_string(lineIndex), line);
 
-        // Check if command was successful
-        if (reply == NULL) {
-            cerr << "Error: " << connection->errstr << endl;
-            return;
-        }
-
-        // Free reply
-        freeReplyObject(reply);
+        // Update line index
+        lineIndex++;
     }
 
     // End of the function
