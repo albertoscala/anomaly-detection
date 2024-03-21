@@ -1,11 +1,11 @@
-# Ignore dataset folder
+# Ignore vscode settings
+.vscode
 
+# Ignore dataset folder
 dataset
 
 # Ignore the .rdb files
-
 dump.rdb
 
 # Ignore the binaries
-
 binaries
