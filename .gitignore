@@ -1,8 +1,11 @@
 # Ignore dataset folder
+
 dataset
 
 # Ignore the .rdb files
-*.rdb
+
+dump.rdb
 
 # Ignore the binaries
+
 binaries
