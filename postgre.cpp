@@ -2,7 +2,10 @@
 
 // Constructor
 Postgre::Postgre(string hostname, int port) {
-
+    // Create a postgre connection
+    this->hostname = hostname;
+    this->port = port;
+    this->conn = PQsetdbLogin(hostname.c_str(), port, NULL, NULL, NULL, NULL, NULL);
 }
 
 // Destructor
