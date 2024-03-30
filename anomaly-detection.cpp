@@ -1,6 +1,7 @@
 #include <iostream>
 #include "redis.hpp"
 #include "test-generator.hpp"
+#include "postgre.hpp"
 using namespace std;
 
 int getWindowSize(int argc, char **argv) {
@@ -40,8 +41,12 @@ int main(int argc, char **argv) {
     // Load the dataset into Redis
     testGenerator.loadDataset();
 
+    //TODO: Controllare come gestire se non li carica XD
     cout << "Dataset loaded" << endl;
 
     // Let's hope for the best -_-"
+
+    Postgre postgre = Postgre("127.0.0.1", 5432);
+    // boh
     return 0;
 }
