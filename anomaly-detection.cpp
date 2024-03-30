@@ -11,23 +11,30 @@ using namespace std;
 const int n_tables = 3;
 
 // Array of the tables
-const string tables[3] = {"means", "variances", "covariances"};
+const string tables[n_tables] = {"means", "variances", "covariances"};
 
 // Array of queries to create the tables
-const string tables_queries[3] = {
+const string tables_queries[n_tables] = {
     "CREATE TABLE means (id INT, mean FLOAT);",             // Query to create the means table
     "CREATE TABLE variances (id INT, variance FLOAT);",     // Query to create the variances table
     "CREATE TABLE covariances (id INT, covariance FLOAT);"  // Query to create the covariances table
-}
+};
 
 // Get the window size from the command line
 int getWindowSize(int argc, char **argv);
 
+// Get the threshold from the command line
+int getThreshold(int argc, char **argv);
+
 // Setup the tables in the database
 // Check if they exists and flush them
 // If they don't exist, create them
-bool tableSetup(Postgre postgre);
+void tableSetup(Postgre postgre);
 
+// Find the anomaly give a dataset, window size and a threshold
+void findAnomalies(int windowSize, int threshold, Redis database, Postgre postgre);
+
+// Main function
 int main(int argc, char **argv) {
     
     // Get the window size from the command line
@@ -58,15 +65,9 @@ int main(int argc, char **argv) {
 
     Postgre postgre = Postgre("127.0.0.1", 5432);
     
-    // Check if the table exists
-    if (!(
-        postgre.tableExists("means") && 
-        postgre.tableExists("variances") && 
-        postgre.tableExists("covariances"))
-        ) {
-        // Create the table
-        postgre.createTable("CREATE TABLE anomalies (timestamp TIMESTAMP, value FLOAT, anomaly BOOLEAN);");
-    }
+    // Setup the tables for the databases
+    //TODO: Forse lo dovremmo spostare in alto tra i preparativi non cambia nulla però...
+    tableSetup(postgre);
 
     return 0;
 }
@@ -89,10 +90,21 @@ int getWindowSize(int argc, char **argv) {
 // Setup the tables in the database
 // Check if they exists and flush them
 // If they don't exist, create them
-bool tableSetup(Postgre postgre) {
+void tableSetup(Postgre postgre) {
     // Setup all the tables
-    for (int i=0; i<; i++) {
-
+    for (int i=0; i<n_tables; i++) {
+        // Check if the table exists
+        if (!postgre.tableExists(tables[i])) {
+            // Create the table
+            postgre.createTable(tables_queries[i]);
+        } else {
+            // Flush/Clean the table
+            postgre.flushTable(tables[i]);
+        }
     }
+}
 
+// Find the anomaly give a dataset, window size and a threshold
+void findAnomalies(int windowSize, int threshold, Redis database, Postgre postgre) {
+    
 }
