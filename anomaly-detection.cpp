@@ -4,21 +4,29 @@
 #include "postgre.hpp"
 #include "statistics.hpp"
 #include "csv.hpp"
+
 using namespace std;
 
-int getWindowSize(int argc, char **argv) {
-    
-    // Default window size
-    int windowSize = 10;
-    
-    // Check if window size is provided as a command line argument
-    if (argc > 1) {
-        // Convert the string to an integer
-        windowSize = atoi(argv[1]);
-    }
+// Number of tables
+const int n_tables = 3;
 
-    return windowSize;
+// Array of the tables
+const string tables[3] = {"means", "variances", "covariances"};
+
+// Array of queries to create the tables
+const string tables_queries[3] = {
+    "CREATE TABLE means (id INT, mean FLOAT);",             // Query to create the means table
+    "CREATE TABLE variances (id INT, variance FLOAT);",     // Query to create the variances table
+    "CREATE TABLE covariances (id INT, covariance FLOAT);"  // Query to create the covariances table
 }
+
+// Get the window size from the command line
+int getWindowSize(int argc, char **argv);
+
+// Setup the tables in the database
+// Check if they exists and flush them
+// If they don't exist, create them
+bool tableSetup(Postgre postgre);
 
 int main(int argc, char **argv) {
     
@@ -49,6 +57,42 @@ int main(int argc, char **argv) {
     // Let's hope for the best -_-"
 
     Postgre postgre = Postgre("127.0.0.1", 5432);
-    // boh
+    
+    // Check if the table exists
+    if (!(
+        postgre.tableExists("means") && 
+        postgre.tableExists("variances") && 
+        postgre.tableExists("covariances"))
+        ) {
+        // Create the table
+        postgre.createTable("CREATE TABLE anomalies (timestamp TIMESTAMP, value FLOAT, anomaly BOOLEAN);");
+    }
+
     return 0;
+}
+
+// Get the window size from the command line
+int getWindowSize(int argc, char **argv) {
+    
+    // Default window size
+    int windowSize = 10;
+    
+    // Check if window size is provided as a command line argument
+    if (argc > 1) {
+        // Convert the string to an integer
+        windowSize = atoi(argv[1]);
+    }
+
+    return windowSize;
+}
+
+// Setup the tables in the database
+// Check if they exists and flush them
+// If they don't exist, create them
+bool tableSetup(Postgre postgre) {
+    // Setup all the tables
+    for (int i=0; i<; i++) {
+
+    }
+
 }
