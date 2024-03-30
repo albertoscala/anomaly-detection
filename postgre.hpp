@@ -17,6 +17,12 @@ class Postgre {
         // Destructor
         ~Postgre();
 
+        bool tableExists(string tableName);
+
+        bool flushTable(string tableName);
+
+        bool createTable(string query);
+
         void postData(string query);
 
         string getData(string query);

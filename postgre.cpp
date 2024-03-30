@@ -20,6 +20,65 @@ Postgre::~Postgre() {
     this->connection->close();
 }
 
+bool Postgre::tableExists(string tableName) {
+    pqxx::result result;
+    
+    // Create a query to check if the table exists
+    string query = "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '" + tableName + "');";
+
+    try {
+        // Execute the query
+        pqxx::work work(*this->connection);
+        result = work.exec(query);
+        work.commit();
+    } catch (const exception &e) {
+        // Error occurred
+        cerr << e.what() << endl;
+        return false;
+    }
+
+    // Get the result of the query
+    bool exists = result[0][0].as<bool>();
+    return exists;
+}
+
+bool Postgre::flushTable(string tableName) {
+    // Create the query to delete all rows in the table
+    string query = "DELETE FROM " + tableName + ";";
+
+    try {
+        // Execute the query
+        pqxx::work work(*this->connection);
+        work.exec(query);
+        work.commit();
+    } catch (const exception &e) {
+        // Error occurred
+        cerr << e.what() << endl;
+        return false;
+    }
+
+    // Table flushed correctly
+    cout << "Table " << tableName << " flushed" << endl;
+    return true;
+}
+
+bool Postgre::createTable(string query) {
+    try {
+        // Execute the query
+        pqxx::work work(*this->connection);
+        work.exec(query);
+        work.commit();
+    } catch (const exception &e) {
+        // Error occurred
+        cerr << e.what() << endl;
+        return false;
+    }
+
+    // Table created correctly
+    cout << "Table created" << endl;
+    return true;
+}
+
 void Postgre::postData(string query) {
 
 }
