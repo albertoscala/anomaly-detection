@@ -2,6 +2,8 @@
 #include "redis.hpp"
 #include "test-generator.hpp"
 #include "postgre.hpp"
+#include "statistics.hpp"
+#include "csv.hpp"
 using namespace std;
 
 int getWindowSize(int argc, char **argv) {

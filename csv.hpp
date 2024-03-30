@@ -1,3 +1,6 @@
+#ifndef CSV_HPP
+#define CSV_HPP
+
 #include <string>
 #include <vector>
 #include <sstream>
@@ -19,3 +22,5 @@ class CSV {
             return tokens;
         }
 };
+
+#endif // CSV_HPP

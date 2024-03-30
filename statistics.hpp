@@ -1,3 +1,6 @@
+#ifndef STATISTICS_HPP
+#define STATISTICS_HPP
+
 #include <vector>
 #include <cmath>
 #include <numeric>
@@ -24,4 +27,6 @@ class Statistics {
 
             return sumSqDiff / values.size();
         }
-};  
+};
+
+#endif // STATISTICS_HPP
