@@ -178,6 +178,7 @@ void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &post
         // Lower than the window size + i (for example 10+1=11 to 20 not 21)
         // Or lower than the test size
         for (int j=i; j < i+windowSize && j <= testSize; j++) {
+            
             cout << "J steps: " << j << endl;
             
             // Get the data from the database
@@ -186,10 +187,10 @@ void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &post
             // Split the data
             sensors = CSV::decompose(data);
             
-            // Data size is 1000
-
             // Drop the first element (timestamp)
             sensors.erase(sensors.begin());
+
+            // Sensors are 999
 
             // Insert in the vector matrix
             matrix.push_back(sensors);
