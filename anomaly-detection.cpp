@@ -1,4 +1,5 @@
 #include <iostream>
+#include <utility>
 #include "redis.hpp"
 #include "test-generator.hpp"
 #include "postgre.hpp"
@@ -33,6 +34,9 @@ void tableSetup(Postgre postgre);
 
 // Function to convert a vector of strings into a vector of numbers
 vector<double> convertToNumbers(vector<string> sensors);
+
+// Function to calculate and prepare the values for the mean and variance
+pair<vector<double>, vector<double>> computations(vector<vector<double>> matrix);
 
 // Find the anomaly give a dataset, window size and a threshold
 void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &postgre, int testSize);
@@ -172,6 +176,45 @@ vector<double> convertToNumbers(vector<string> sensors) {
     return numbers;
 }
 
+// Function to calculate and prepare the values for the mean and variance
+pair<vector<double>, vector<double>> computations(vector<vector<double>> matrix) {
+    vector<double> values;
+    vector<double> means;
+    vector<double> variances;
+
+    // Create the pair to store the values
+    pair<vector<double>, vector<double>> result;
+
+    for (int i=0; i<matrix[0].size(); i++) {
+        // Create a vector to store the values of the sensors
+        values.clear();
+        
+        // TODO: Check if the vector is empty
+
+        // Set the for loop to get the values of the sensors
+        for (int j=0; j<matrix.size(); j++) {
+            values.push_back(matrix[j][i]);
+        }
+
+        // Calculate the mean
+        double mean = Statistics::calculateMean(values);
+        
+        // Calculate the variance
+        double variance = Statistics::calculateVariance(values, mean);
+        
+        // Insert the mean and variance in the vectors
+        means.push_back(mean);
+        variances.push_back(variance);
+    }
+
+    // Insert the vectors in the pair
+    result.first = means;
+    result.second = variances;
+
+    // End of the function
+    return result;
+}
+
 // Find the anomaly give a dataset, window size and a threshold
 void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &postgre, int testSize) {
     // Create a matrix to store the data
@@ -183,6 +226,9 @@ void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &post
     // Create a vector to store the sensors
     vector<string> s_sensors;
     vector<double> d_sensors;
+
+    // Create a pair to store the values
+    pair<vector<double>, vector<double>> values;
 
     // Start getting the data from the database
 
@@ -224,5 +270,18 @@ void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &post
             // Insert in the vector matrix
             matrix.push_back(d_sensors);
         }
+
+        values = computations(matrix);
+
+        cout << "Means size: " << values.first.size() << endl;
+        cout << "Variances size: " << values.second.size() << endl;
+
+        // Print the means
+        for (double mean : values.first) {
+            cout << mean << " ";
+        }
+        cout << endl;
+
+        break;
     }
 }
