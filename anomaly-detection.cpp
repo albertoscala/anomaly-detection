@@ -32,7 +32,7 @@ int getThreshold(int argc, char **argv);
 void tableSetup(Postgre postgre);
 
 // Find the anomaly give a dataset, window size and a threshold
-void findAnomalies(int windowSize, int threshold, Redis database, Postgre postgre, int testSize);
+void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &postgre, int testSize);
 
 // Main function
 int main(int argc, char **argv) {
@@ -148,7 +148,7 @@ void tableSetup(Postgre postgre) {
 }
 
 // Find the anomaly give a dataset, window size and a threshold
-void findAnomalies(int windowSize, int threshold, Redis database, Postgre postgre, int testSize) {
+void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &postgre, int testSize) {
     // Create a matrix to store the data
     vector<vector<string>> matrix;
     
