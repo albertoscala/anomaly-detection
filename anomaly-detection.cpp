@@ -15,9 +15,9 @@ const string tables[n_tables] = {"means", "variances", "covariances"};
 
 // Array of queries to create the tables
 const string tables_queries[n_tables] = {
-    "CREATE TABLE means (id INT, mean FLOAT);",             // Query to create the means table
-    "CREATE TABLE variances (id INT, variance FLOAT);",     // Query to create the variances table
-    "CREATE TABLE covariances (id INT, covariance FLOAT);"  // Query to create the covariances table
+    "CREATE TABLE means (id INT, mean JSON);",             // Query to create the means table
+    "CREATE TABLE variances (id INT, variance JSON);",     // Query to create the variances table
+    "CREATE TABLE covariances (id INT, covariance JSON);"  // Query to create the covariances table
 };
 
 // Get the window size from the command line
@@ -30,6 +30,9 @@ int getThreshold(int argc, char **argv);
 // Check if they exists and flush them
 // If they don't exist, create them
 void tableSetup(Postgre postgre);
+
+// Function to convert a vector of strings into a vector of numbers
+vector<double> convertToNumbers(vector<string> sensors);
 
 // Find the anomaly give a dataset, window size and a threshold
 void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &postgre, int testSize);
@@ -91,8 +94,7 @@ int main(int argc, char **argv) {
     // Find anomalies
     findAnomalies(windowSize, threshold, database, postgre, testGenerator.getTestSize());
 
-    cout << "Anomalies found." << endl;
-
+    // End of the program
     return 0;
 }
 
@@ -147,16 +149,40 @@ void tableSetup(Postgre postgre) {
     }
 }
 
+// Function to convert a vector of strings into a vector of numbers
+vector<double> convertToNumbers(vector<string> sensors) {
+    double number;
+    vector<double> numbers;
+    
+    for (string sensor : sensors) {
+        try {
+            // Try to convert the string to a double
+            number = stod(sensor);
+            numbers.push_back(number);
+        } catch (invalid_argument e) {
+            // Report the error
+            cerr << "Error: non numeric value found, will be zeroed" << endl;
+            
+            // Zero the value
+            number = 0.0;
+            numbers.push_back(number);
+        }
+    }
+
+    return numbers;
+}
+
 // Find the anomaly give a dataset, window size and a threshold
 void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &postgre, int testSize) {
     // Create a matrix to store the data
-    vector<vector<string>> matrix;
+    vector<vector<double>> matrix;
     
     // Create a string to store the data
     string data;
 
     // Create a vector to store the sensors
-    vector<string> sensors;
+    vector<string> s_sensors;
+    vector<double> d_sensors;
 
     // Start getting the data from the database
 
@@ -185,15 +211,18 @@ void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &post
             data = database.getData(to_string(j));
             
             // Split the data
-            sensors = CSV::decompose(data);
+            s_sensors = CSV::decompose(data);
             
             // Drop the first element (timestamp)
-            sensors.erase(sensors.begin());
+            s_sensors.erase(s_sensors.begin());
 
             // Sensors are 999
 
+            // Convert the sensors to numbers
+            d_sensors = convertToNumbers(s_sensors);
+
             // Insert in the vector matrix
-            matrix.push_back(sensors);
+            matrix.push_back(d_sensors);
         }
     }
 }
