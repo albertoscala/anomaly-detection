@@ -17,7 +17,9 @@ class Redis {
         // Destructor
         ~Redis();
 
-        void setData(string key, string value);
+        bool alive();
+
+        bool setData(string key, string value);
 
         string getData(string key);
 };

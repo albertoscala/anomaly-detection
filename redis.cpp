@@ -13,18 +13,31 @@ Redis::~Redis() {
 
 }
 
-void Redis::setData(string key, string value) {
+bool Redis::alive() {
+    // Check if connection is alive
+    if (this->connection == NULL || this->connection->err) {
+        cerr << "Error: Connection to Redis server failed." << endl;
+        return false;
+    }
+
+    return true;
+
+    // End of function
+}
+
+bool Redis::setData(string key, string value) {
     redisReply *reply = (redisReply *)redisCommand(this->connection, "SET %s %s", key.c_str(), value.c_str());
     
     if (!reply) {
         cerr << "Error: Failed to set key '" << key << "'." << endl;
         
-        //TODO: Gestire errore
+        return false;
     }
 
     freeReplyObject(reply);
     
     // End of function
+    return true;
 }
 
 string Redis::getData(string key) {

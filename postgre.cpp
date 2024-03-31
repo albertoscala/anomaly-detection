@@ -20,6 +20,16 @@ Postgre::~Postgre() {
     this->connection->close();
 }
 
+bool Postgre::alive() {
+    // Check if connection is alive
+    if (this->connection == nullptr || !this->connection->is_open()) {
+        cerr << "Error: Connection to Postgre server failed." << endl;
+        return false;
+    }
+
+    return true;
+}
+
 bool Postgre::tableExists(string tableName) {
     pqxx::result result;
     

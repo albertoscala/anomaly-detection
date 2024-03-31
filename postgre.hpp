@@ -17,6 +17,8 @@ class Postgre {
         // Destructor
         ~Postgre();
 
+        bool alive();
+
         bool tableExists(string tableName);
 
         bool flushTable(string tableName);

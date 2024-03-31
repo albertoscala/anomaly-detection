@@ -1,10 +1,25 @@
+# Makefile to compile the anomaly detection program
+
+# Compiler
 CC = g++
-CFLAGS = -Wall -Wextra -std=c++11
 
-all: anomaly-detection
+# Compiler flags
+CFLAGS = -Wall -Wextra -Werror -std=c++11
 
-anomaly-detection: anomaly-detection.cpp 
-	$(CC) $(CFLAGS) -o binaries/anomaly-detection anomaly-detection.cpp redis.cpp redis.hpp test-generator.cpp test-generator.hpp postgre.cpp postgre.hpp -lhiredis -lpqxx -lpq
+# Source files 
+SRC = anomaly-detection.cpp postgre.cpp postgre.hpp redis.cpp redis.hpp test-generator.cpp test-generator.hpp statistics.hpp csv.hpp
+
+# Libraries such as libpqxx and hiredis
+LIBS = -lpqxx -lpq -lhiredis
+
+# Executable name
+EXE = binaries/anomaly-detection
+
+# Makefile rules
+all: $(EXE)
+
+$(EXE): $(SRC)
+	$(CC) $(CFLAGS) $(SRC) -o $(EXE) $(LIBS)
 
 clean:
-	rm -f anomaly-detection
+	rm -f $(EXE)

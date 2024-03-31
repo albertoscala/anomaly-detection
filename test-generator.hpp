@@ -14,6 +14,7 @@ class TestGenerator {
         string datasetPath;
         list<string> lines;
         Redis& database;
+        int testSize;
     public:
         // Constructor
         TestGenerator(string datasetPath, Redis& database);
@@ -21,9 +22,11 @@ class TestGenerator {
         // Destructor
         ~TestGenerator();
 
-        void readDataset();
+        bool readDataset();
 
-        void loadDataset();
+        bool loadDataset();
+
+        int getTestSize();
 };
 
 #endif // TEST_GENERATOR_HPP
