@@ -27,6 +27,20 @@ class Statistics {
 
             return sumSqDiff / values.size();
         }
+
+        // Calculate the covariance of a vector of values
+        static double calculateCovariance(vector<double>& actual, vector<double> precedent, double m_act, double m_pre) {
+            if (actual.size() != precedent.size()) {
+                cerr << "Error: vectors have different lengths, they must be of same size";
+                return 0.0;
+            }
+            float sum = 0;
+            for (int i=0; i<actual.size(), i++) {
+                sum += (actual[i] - m_act) * (precedent[i] - m_pre);
+            }
+            return sum / (actual.size() -1)
+            
+        }
 };
 
 #endif // STATISTICS_HPP
