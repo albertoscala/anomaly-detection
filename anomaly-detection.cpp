@@ -5,6 +5,7 @@
 #include "postgre.hpp"
 #include "statistics.hpp"
 #include "csv.hpp"
+#include "json.hpp"
 
 using namespace std;
 
@@ -273,14 +274,18 @@ void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &post
 
         values = computations(matrix);
 
-        cout << "Means size: " << values.first.size() << endl;
-        cout << "Variances size: " << values.second.size() << endl;
+        // Debug
+
+        //cout << "Means size: " << values.first.size() << endl;
+        //cout << "Variances size: " << values.second.size() << endl;
 
         // Print the means
-        for (double mean : values.first) {
-            cout << mean << " ";
-        }
-        cout << endl;
+        //for (double mean : values.first) {
+        //    cout << mean << " ";
+        //}
+        //cout << endl;
+
+
 
         break;
     }
