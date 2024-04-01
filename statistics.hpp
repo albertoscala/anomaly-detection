@@ -40,7 +40,7 @@ class Statistics {
             double sum = 0.0;
             
             // Calculate the covariance
-            for (int i=0; i<actual.size(), i++) {
+            for (int i=0; i<actual.size(); i++) {
                 sum += (actual[i] - m_act) * (precedent[i] - m_pre);
             }
 
