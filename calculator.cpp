@@ -22,3 +22,6 @@ double calculateVariance(vector<double>& values, double mean) {
     return sumSqDiff / values.size();
 }
 
+double calculateCovariance(vector<double>& values1, vector<double>& values2, double mean1, double mean2) {
+    
+}

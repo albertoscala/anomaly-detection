@@ -231,10 +231,14 @@ void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &post
     // Create a pair to store the values
     pair<vector<double>, vector<double>> values;
 
+    // Strings to store the JSON values
+    string means;
+    string variances; 
+
     // Start getting the data from the database
 
     // Setting the for loop for the window
-    for (int i=1; i <= testSize; i+=windowSize) {
+    for (int i=1, k=1; i <= testSize; i+=windowSize, k++) {
 
         cout << "I steps: " << i << endl;
 
@@ -285,7 +289,20 @@ void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &post
         //}
         //cout << endl;
 
+        // Encode the mean values in JSON
+        means = JSON::compose(values.first);
 
+        // Encode the variance values in JSON
+        variances = JSON::compose(values.second);
+
+        // Debug
+        //cout << "Means: " << means << endl;
+        //cout << "Variances: " << variances << endl;
+
+        // Calculate the covariance if we are at the second window
+        if (k > 1) {
+            // TODO: Grazie yara per implementare il calcolo della covarianza
+        }
 
         break;
     }
