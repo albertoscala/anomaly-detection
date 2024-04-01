@@ -30,16 +30,22 @@ class Statistics {
 
         // Calculate the covariance of a vector of values
         static double calculateCovariance(vector<double>& actual, vector<double> precedent, double m_act, double m_pre) {
+            // Check if the vectors have the same size
             if (actual.size() != precedent.size()) {
                 cerr << "Error: vectors have different lengths, they must be of same size";
                 return 0.0;
             }
-            float sum = 0;
+
+            // Variables to store the sum of the products
+            double sum = 0.0;
+            
+            // Calculate the covariance
             for (int i=0; i<actual.size(), i++) {
                 sum += (actual[i] - m_act) * (precedent[i] - m_pre);
             }
-            return sum / (actual.size() -1)
-            
+
+            // Return the covariance with the final result
+            return sum / (actual.size() -1);
         }
 };
 
