@@ -10,16 +10,15 @@
 using namespace std;
 
 // Number of tables
-const int n_tables = 3;
+const int n_tables = 2;
 
 // Array of the tables
-const string tables[n_tables] = {"means", "variances", "covariances"};
+const string tables[n_tables] = {"means", "covariances"};
 
 // Array of queries to create the tables
 const string tables_queries[n_tables] = {
-    "CREATE TABLE means (id INT, mean JSON);",             // Query to create the means table
-    "CREATE TABLE variances (id INT, variance JSON);",     // Query to create the variances table
-    "CREATE TABLE covariances (id INT, covariance JSON);"  // Query to create the covariances table
+    "CREATE TABLE means (id INT PRIMARY KEY, data JSON);",          // Query to create the means table
+    "CREATE TABLE covariances (id INT PRIMARY KEY, data JSON);"     // Query to create the covariances table
 };
 
 // Get the window size from the command line
@@ -34,10 +33,16 @@ int getThreshold(int argc, char **argv);
 void tableSetup(Postgre postgre);
 
 // Function to convert a vector of strings into a vector of numbers
-vector<double> convertToNumbers(vector<string> sensors);
+vector<double> convertToNumbers(vector<string>& sensors);
 
-// Function to calculate and prepare the values for the mean and variance
-pair<vector<double>, vector<double>> computations(vector<vector<double>> matrix);
+// Function to calculate and prepare the values for the mean
+vector<double> meanComputation(vector<vector<double>>& matrix);
+
+// Function to calculate and prepare the values for the covariance
+vector<double> covarianceComputation(vector<vector<double>>& matrix_p, vector<vector<double>>& matrix_a, vector<double>& means_p, vector<double>& means_a);
+
+// Function to upload data to the database
+bool uploadData(Postgre& postgre, string table, int timestamp, string json_data);
 
 // Find the anomaly give a dataset, window size and a threshold
 void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &postgre, int testSize);
@@ -144,18 +149,18 @@ void tableSetup(Postgre postgre) {
             // Create the table
             cout << "Table " << tables[i] << " does not exist." << endl;
             cout << "Creating table " << tables[i] << "..." << endl;
-            //postgre.createTable(tables_queries[i]);
+            postgre.createTable(tables_queries[i]);
         } else {
             // Flush/Clean the table
             cout << "Table " << tables[i] << " exists." << endl;
             cout << "Flushing table " << tables[i] << "..." << endl;
-            //postgre.flushTable(tables[i]);
+            postgre.flushTable(tables[i]);
         }
     }
 }
 
 // Function to convert a vector of strings into a vector of numbers
-vector<double> convertToNumbers(vector<string> sensors) {
+vector<double> convertToNumbers(vector<string>& sensors) {
     double number;
     vector<double> numbers;
     
@@ -166,7 +171,7 @@ vector<double> convertToNumbers(vector<string> sensors) {
             numbers.push_back(number);
         } catch (invalid_argument e) {
             // Report the error
-            cerr << "Error: non numeric value found, will be zeroed" << endl;
+            //cerr << "Error: non numeric value found, will be zeroed" << endl;
             
             // Zero the value
             number = 0.0;
@@ -177,14 +182,10 @@ vector<double> convertToNumbers(vector<string> sensors) {
     return numbers;
 }
 
-// Function to calculate and prepare the values for the mean and variance
-pair<vector<double>, vector<double>> computations(vector<vector<double>> matrix) {
+// Function to calculate and prepare the values for the mean
+vector<double> meanComputation(vector<vector<double>>& matrix) {
     vector<double> values;
     vector<double> means;
-    vector<double> variances;
-
-    // Create the pair to store the values
-    pair<vector<double>, vector<double>> result;
 
     for (int i=0; i<matrix[0].size(); i++) {
         // Create a vector to store the values of the sensors
@@ -200,26 +201,55 @@ pair<vector<double>, vector<double>> computations(vector<vector<double>> matrix)
         // Calculate the mean
         double mean = Statistics::calculateMean(values);
         
-        // Calculate the variance
-        double variance = Statistics::calculateVariance(values, mean);
-        
         // Insert the mean and variance in the vectors
         means.push_back(mean);
-        variances.push_back(variance);
     }
 
-    // Insert the vectors in the pair
-    result.first = means;
-    result.second = variances;
+    // End of the function
+    return means;
+}
+
+// Function to calculate and prepare the values for the covariance
+vector<double> covarianceComputation(vector<vector<double>>& matrix_p, vector<vector<double>>& matrix_a, vector<double>& means_p, vector<double>& means_a) {
+    // Create a vector to store the values
+    vector<double> values_p;    // Values from the precedent matrix
+    vector<double> values_a;    // Values from the actual matrix
+
+    // Create a vector to store the covariances
+    vector<double> covariances;
+
+    // Create a variable to temporarily store the covariance
+    double covariance;
+
+    // Use matrix_a as limits since the two matrices have the same size
+    for (int i=0; i<matrix_a[0].size(); i++) {
+        // Create a vector to store the values of the sensors from the precedent and actual matrix
+        values_p.clear();
+        values_a.clear();
+
+        // Set the for loop to get the values of the sensors
+        // Use matrix_a as limits since the two matrices have the same size
+        for (int j=0; j<matrix_a.size(); j++) {
+            values_p.push_back(matrix_p[j][i]);
+            values_a.push_back(matrix_a[j][i]);
+        }
+
+        // Calculate the covariance
+        double covariance = Statistics::calculateCovariance(values_a, values_p, means_a[i], means_p[i]);
+
+        // Insert the covariance in the vector
+        covariances.push_back(covariance);
+    }
 
     // End of the function
-    return result;
+    return covariances;
 }
 
 // Find the anomaly give a dataset, window size and a threshold
 void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &postgre, int testSize) {
     // Create a matrix to store the data
-    vector<vector<double>> matrix;
+    vector<vector<double>> matrix_p;    // Precedent matrix
+    vector<vector<double>> matrix_a;    // Actual matrix
     
     // Create a string to store the data
     string data;
@@ -228,12 +258,16 @@ void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &post
     vector<string> s_sensors;
     vector<double> d_sensors;
 
-    // Create a pair to store the values
-    pair<vector<double>, vector<double>> values;
+    // Create a vector to store the means
+    vector<double> means_p;     // Precedent means
+    vector<double> means_a;     // Actual means
+
+    // Create a vector to store the covariances
+    vector<double> covariances_a;    // Actual covariances
 
     // Strings to store the JSON values
     string means;
-    string variances; 
+    string covariances; 
 
     // Start getting the data from the database
 
@@ -243,10 +277,10 @@ void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &post
         cout << "I steps: " << i << endl;
 
         // Clear the matrix for the new window
-        matrix.clear();
+        matrix_a.clear();
 
         // Check if the matrix is clear
-        if (!matrix.empty()) {
+        if (!matrix_a.empty()) {
             cerr << "Error: Matrix is not empty." << endl;
             return;
         }
@@ -273,37 +307,43 @@ void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &post
             d_sensors = convertToNumbers(s_sensors);
 
             // Insert in the vector matrix
-            matrix.push_back(d_sensors);
+            matrix_a.push_back(d_sensors);
         }
 
-        values = computations(matrix);
-
-        // Debug
-
-        //cout << "Means size: " << values.first.size() << endl;
-        //cout << "Variances size: " << values.second.size() << endl;
-
-        // Print the means
-        //for (double mean : values.first) {
-        //    cout << mean << " ";
-        //}
-        //cout << endl;
+        means_a = meanComputation(matrix_a);
 
         // Encode the mean values in JSON
-        means = JSON::compose(values.first);
+        means = JSON::compose(means_a);
 
-        // Encode the variance values in JSON
-        variances = JSON::compose(values.second);
+        // cout << "Means: " << means << endl;
+
+        // Upload the means and covariances to the database
+        //postgre.postData("means", k, means);
 
         // Debug
         //cout << "Means: " << means << endl;
-        //cout << "Variances: " << variances << endl;
 
         // Calculate the covariance if we are at the second window
         if (k > 1) {
-            // TODO: Grazie yara per implementare il calcolo della covarianza
+            // Calculate the covariance
+            covariances_a = covarianceComputation(matrix_a, matrix_p, means_a, means_p);
+
+            // Encode the covariance values in JSON
+            covariances = JSON::compose(covariances_a);
+
+            // Debug
+            cout << "Covariances: " << covariances << endl;
+
+            // Upload the covariances to the database
+            //postgre.postData("covariances", k, covariances);
         }
 
-        break;
+        // Swtich the matrices and vectors
+
+        // Set the precedent matrix
+        matrix_p = matrix_a;
+
+        // Set the precedent means
+        means_p = means_a;
     }
 }

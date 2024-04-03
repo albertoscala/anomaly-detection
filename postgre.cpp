@@ -43,7 +43,7 @@ bool Postgre::tableExists(string tableName) {
         work.commit();
     } catch (const exception &e) {
         // Error occurred
-        cerr << e.what() << endl;
+        cerr << e.what() << ": tableexists" << endl;
         return false;
     }
 
@@ -63,7 +63,7 @@ bool Postgre::flushTable(string tableName) {
         work.commit();
     } catch (const exception &e) {
         // Error occurred
-        cerr << e.what() << endl;
+        cerr << e.what() << ": flushtable" << endl;
         return false;
     }
 
@@ -80,7 +80,7 @@ bool Postgre::createTable(string query) {
         work.commit();
     } catch (const exception &e) {
         // Error occurred
-        cerr << e.what() << endl;
+        cerr << e.what() << ": createtable" << endl;
         return false;
     }
 
@@ -89,8 +89,22 @@ bool Postgre::createTable(string query) {
     return true;
 }
 
-void Postgre::postData(string query) {
+void Postgre::postData(string table, int timestamp, string json_data) {
+    // Create the query to insert data into the table
+    string query = "INSERT INTO " + table + " (id, data) VALUES (" + to_string(timestamp) + ", '" + json_data + "');";
 
+    // Debug query
+    // cout << query << endl;
+
+    try {
+        // Execute the query
+        pqxx::work work(*this->connection);
+        work.exec(query);
+        work.commit();
+    } catch (const exception &e) {
+        // Error occurred
+        cerr << e.what() << ": postdata" << endl;
+    }
 }
 
 string Postgre::getData(string query) {

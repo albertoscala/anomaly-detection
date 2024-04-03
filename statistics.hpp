@@ -4,6 +4,7 @@
 #include <vector>
 #include <cmath>
 #include <numeric>
+#include <iostream>
 
 using namespace std;
 
@@ -17,19 +18,20 @@ class Statistics {
             return mean;
         }
 
-        // Calculate the variance of a vector of values
-        static double calculateVariance(vector<double>& values, double mean) {
-            double sumSqDiff = 0.0;
-            for(double val : values) {
-                double diff = val - mean;
-                sumSqDiff += diff * diff;
-            }
-
-            return sumSqDiff / values.size();
-        }
+        //FIXME: This function is not used, so it can be removed (maybe)
+        //// Calculate the variance of a vector of values
+        //static double calculateVariance(vector<double>& values, double mean) {
+        //    double sumSqDiff = 0.0;
+        //    for(double val : values) {
+        //        double diff = val - mean;
+        //        sumSqDiff += diff * diff;
+        //    }
+        //
+        //    return sumSqDiff / values.size();
+        //}
 
         // Calculate the covariance of a vector of values
-        static double calculateCovariance(vector<double>& actual, vector<double> precedent, double m_act, double m_pre) {
+        static double calculateCovariance(vector<double>& actual, vector<double>& precedent, double m_act, double m_pre) {
             // Check if the vectors have the same size
             if (actual.size() != precedent.size()) {
                 cerr << "Error: vectors have different lengths, they must be of same size";

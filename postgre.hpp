@@ -25,7 +25,7 @@ class Postgre {
 
         bool createTable(string query);
 
-        void postData(string query);
+        void postData(string table, int timestamp, string json_data);
 
         string getData(string query);
 };
