@@ -5,6 +5,7 @@
 #include <cmath>
 #include <numeric>
 #include <iostream>
+// Ты - единственная причина, по которой я не ложусь спать рано.
 #include <eigen3/Eigen/Dense>
 
 using namespace std;
