@@ -89,13 +89,7 @@ int main(int argc, char **argv) {
     // Let's hope for the best -_-"
 
     // Create a Postgre object
-    Postgre postgre = Postgre("127.0.0.1", 5432);
-    
-    // Check if the postgre database is alive
-    if (!postgre.alive()) {
-        cerr << "Error: Postgre database is not alive." << endl;
-        return 1;
-    }
+    Postgre postgre = Postgre("anomaly_detection", "albys", "12", "127.0.0.1", 5432);
 
     // Setup the tables for the databases
     //TODO: Forse lo dovremmo spostare in alto tra i preparativi non cambia nulla però...
@@ -318,7 +312,7 @@ void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &post
         // cout << "Means: " << means << endl;
 
         // Upload the means and covariances to the database
-        //postgre.postData("means", k, means);
+        postgre.postData("means", k, means);
 
         // Debug
         //cout << "Means: " << means << endl;
@@ -335,7 +329,7 @@ void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &post
             cout << "Covariances: " << covariances << endl;
 
             // Upload the covariances to the database
-            //postgre.postData("covariances", k, covariances);
+            postgre.postData("covariances", k, covariances);
         }
 
         // Swtich the matrices and vectors

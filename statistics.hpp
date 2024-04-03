@@ -5,10 +5,13 @@
 #include <cmath>
 #include <numeric>
 #include <iostream>
+#include <eigen3/Eigen/Dense>
 
 using namespace std;
 
 class Statistics {
+    private:
+        // TODO: WE HAVE TO IMPLEMENT COMPATIBILITY FUNCTIONS FOR THE DISTANCE PLS GOD
     public:
         // Calculate the mean of a vector of values
         static double calculateMean(vector<double>& values) {
@@ -17,18 +20,6 @@ class Statistics {
 
             return mean;
         }
-
-        //FIXME: This function is not used, so it can be removed (maybe)
-        //// Calculate the variance of a vector of values
-        //static double calculateVariance(vector<double>& values, double mean) {
-        //    double sumSqDiff = 0.0;
-        //    for(double val : values) {
-        //        double diff = val - mean;
-        //        sumSqDiff += diff * diff;
-        //    }
-        //
-        //    return sumSqDiff / values.size();
-        //}
 
         // Calculate the covariance of a vector of values
         static double calculateCovariance(vector<double>& actual, vector<double>& precedent, double m_act, double m_pre) {
@@ -48,6 +39,12 @@ class Statistics {
 
             // Return the covariance with the final result
             return sum / (actual.size() -1);
+        }
+
+        // Calculate the Mahalanobis distance
+        static double calculateMahalanobisDistance(vector<vector<double>>& values_p, vector<vector<double>>& values_a, vector<double>& mean_p, vector<double> covariance) {
+            // Convert the vectors to matrices
+            // TODO: We will do this, just tomorrow
         }
 };
 

@@ -1,40 +1,49 @@
 #include "postgre.hpp"
 
 // Constructor
-Postgre::Postgre(string hostname, int port) {
-    // Create a postgre connection using pqxx library
-    this->connection = new pqxx::connection("dbname=anomaly_detection user=albys password=12 hostaddr=" + hostname + " port=" + to_string(port));
-
-    // Check if the connection is successful
-    if(this->connection->is_open()) {
-        cout << "Opened database successfully: " << this->connection->dbname() << endl;
-    } else {
-        cout << "Can't open database" << endl;
-        this->connection = nullptr;
-    }
+Postgre::Postgre(string dbname, string user, string password, string hostname, int port) {
+    // Set the credentials
+    this->dbname = dbname;
+    this->user = user;
+    this->password = password;
+    this->hostname = hostname;
+    this->port = to_string(port);
 }
 
 // Destructor
 Postgre::~Postgre() {
+    
+}
+
+// Function to open the connection to the database
+void Postgre::openConnection() {
+    // Create the connection string
+    string connection_string = "dbname=" + this->dbname + " user=" + this->user + " password=" + this->password + " hostaddr=" + this->hostname + " port=" + this->port;
+
+    try {
+        // Create the connection object
+        this->connection = new pqxx::connection(connection_string);
+    } catch (const exception &e) {
+        // Error occurred
+        cerr << e.what() << ": openconnection" << endl;
+    }
+}
+
+// Function to close the connection to the database
+void Postgre::closeConnection() {
     // Close the connection
     this->connection->close();
 }
 
-bool Postgre::alive() {
-    // Check if connection is alive
-    if (this->connection == nullptr || !this->connection->is_open()) {
-        cerr << "Error: Connection to Postgre server failed." << endl;
-        return false;
-    }
-
-    return true;
-}
-
+// Function to check if a table exists in the database
 bool Postgre::tableExists(string tableName) {
     pqxx::result result;
     
     // Create a query to check if the table exists
     string query = "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '" + tableName + "');";
+
+    // Open the connection
+    this->openConnection();
 
     try {
         // Execute the query
@@ -47,14 +56,21 @@ bool Postgre::tableExists(string tableName) {
         return false;
     }
 
+    // Close the connection
+    this->closeConnection();
+
     // Get the result of the query
     bool exists = result[0][0].as<bool>();
     return exists;
 }
 
+// Function to clean the table from old values
 bool Postgre::flushTable(string tableName) {
     // Create the query to delete all rows in the table
     string query = "DELETE FROM " + tableName + ";";
+
+    // Open the connection
+    this->openConnection();
 
     try {
         // Execute the query
@@ -67,12 +83,19 @@ bool Postgre::flushTable(string tableName) {
         return false;
     }
 
+    // Close the connection
+    this->closeConnection();
+
     // Table flushed correctly
     cout << "Table " << tableName << " flushed" << endl;
     return true;
 }
 
+// Function to create the table if it doesn't exist
 bool Postgre::createTable(string query) {
+    // Open the connection
+    this->openConnection();
+
     try {
         // Execute the query
         pqxx::work work(*this->connection);
@@ -84,17 +107,21 @@ bool Postgre::createTable(string query) {
         return false;
     }
 
+    // Close the connection
+    this->closeConnection();
+
     // Table created correctly
     cout << "Table created" << endl;
     return true;
 }
 
+// Function to insert the date in the database
 void Postgre::postData(string table, int timestamp, string json_data) {
     // Create the query to insert data into the table
     string query = "INSERT INTO " + table + " (id, data) VALUES (" + to_string(timestamp) + ", '" + json_data + "');";
 
-    // Debug query
-    // cout << query << endl;
+    // Open the connection
+    this->openConnection();
 
     try {
         // Execute the query
@@ -105,8 +132,7 @@ void Postgre::postData(string table, int timestamp, string json_data) {
         // Error occurred
         cerr << e.what() << ": postdata" << endl;
     }
-}
 
-string Postgre::getData(string query) {
-    
+    // Close the connection
+    this->closeConnection();
 }
