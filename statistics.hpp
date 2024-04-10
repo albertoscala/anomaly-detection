@@ -5,8 +5,6 @@
 #include <cmath>
 #include <numeric>
 #include <iostream>
-// Ты - единственная причина, по которой я не ложусь спать рано.
-#include <eigen3/Eigen/Dense>
 
 using namespace std;
 
@@ -43,9 +41,35 @@ class Statistics {
         }
 
         // Calculate the Mahalanobis distance
-        static double calculateMahalanobisDistance(vector<vector<double>>& values_p, vector<vector<double>>& values_a, vector<double>& mean_p, vector<double> covariance) {
-            // Convert the vectors to matrices
-            // TODO: We will do this, just tomorrow
+        static vector<double> calculateDistance(vector<vector<double>>& values_a, vector<double>& mean_p) {
+            // Create a vector to store the distances
+            vector<vector<double>> distances(values_a.size(), vector<double>(values_a[0].size(), 0.0));
+            
+            // Create vector to store the means of the distances
+            vector<double> distances_means;
+
+            // Calculate the distances
+            for (int i=0; i<values_a.size(); i++) {
+                for (int j=0; j<values_a[i].size(); j++) {
+                    values_a[i][j] = values_a[i][j] - mean_p[i];
+                }
+            }
+
+            // Calculate mean of the distances for each feature
+            for (int j=0; j<values_a[0].size(); j++) {
+                // Create a temporary vector to store the values of the column
+                vector<double> column;
+
+                for (int i=0; i<values_a.size(); i++) {
+                    // Store the values of the columns
+                    column.push_back(values_a[i][j]);
+                }
+
+                // Calculate the mean of the column
+                distances_means.push_back(calculateMean(column));
+            }
+
+            return distances_means;
         }
 };
 

@@ -6,6 +6,7 @@
 #include "statistics.hpp"
 #include "csv.hpp"
 #include "json.hpp"
+#include <cmath>
 
 using namespace std;
 
@@ -25,7 +26,7 @@ const string tables_queries[n_tables] = {
 int getWindowSize(int argc, char **argv);
 
 // Get the threshold from the command line
-int getThreshold(int argc, char **argv);
+double getThreshold(int argc, char **argv);
 
 // Setup the tables in the database
 // Check if they exists and flush them
@@ -44,8 +45,11 @@ vector<double> covarianceComputation(vector<vector<double>>& matrix_p, vector<ve
 // Function to upload data to the database
 bool uploadData(Postgre& postgre, string table, int timestamp, string json_data);
 
+// Function to verify the anomalies
+void verifyAnomalies(vector<vector<double>>& matrix_a, vector<double>& means, double threshold);
+
 // Find the anomaly give a dataset, window size and a threshold
-void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &postgre, int testSize);
+void findAnomalies(int windowSize, double threshold, Redis &database, Postgre &postgre, int testSize);
 
 // Main function
 int main(int argc, char **argv) {
@@ -56,7 +60,7 @@ int main(int argc, char **argv) {
     cout << "Window size: " << windowSize << endl;
 
     // Get the threshold from the command line
-    int threshold = getThreshold(argc, argv);
+    double threshold = getThreshold(argc, argv);
 
     cout << "Threshold: " << threshold << endl;
 
@@ -118,15 +122,15 @@ int getWindowSize(int argc, char **argv) {
 }
 
 // Get the threshold from the command line
-int getThreshold(int argc, char **argv) {
+double getThreshold(int argc, char **argv) {
     
     // Default threshold
-    int threshold = 3;
+    double threshold = 0.3;
     
     // Check if threshold is provided as a command line argument
     if (argc > 2) {
         // Convert the string to an integer
-        threshold = atoi(argv[2]);
+        threshold = stod(argv[2]);
     }
 
     return threshold;
@@ -239,8 +243,26 @@ vector<double> covarianceComputation(vector<vector<double>>& matrix_p, vector<ve
     return covariances;
 }
 
+// Function to verify the anomalies
+void verifyAnomalies(vector<vector<double>>& matrix_a, vector<double>& means, double threshold) {
+    // Create a vector to store the distances
+    vector<double> distances_means;
+
+    // Calculate the distances
+    distances_means = Statistics::calculateDistance(matrix_a, means);
+
+    // Set the for loop to verify the anomalies
+    for (int i=0; i<distances_means.size(); i++) {
+        // Check if the distance is greater than the threshold
+        if (abs(distances_means[i]) > threshold) {
+            // Report the anomaly
+            cout << "Anomaly detected at sensor " << i << " with distance " << distances_means[i] << endl;
+        }
+    }
+}
+
 // Find the anomaly give a dataset, window size and a threshold
-void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &postgre, int testSize) {
+void findAnomalies(int windowSize, double threshold, Redis &database, Postgre &postgre, int testSize) {
     // Create a matrix to store the data
     vector<vector<double>> matrix_p;    // Precedent matrix
     vector<vector<double>> matrix_a;    // Actual matrix
@@ -267,8 +289,8 @@ void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &post
 
     // Setting the for loop for the window
     for (int i=1, k=1; i <= testSize; i+=windowSize, k++) {
-
-        cout << "I steps: " << i << endl;
+        // Debug I steps
+        //cout << "I steps: " << i << endl;
 
         // Clear the matrix for the new window
         matrix_a.clear();
@@ -283,8 +305,8 @@ void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &post
         // Lower than the window size + i (for example 10+1=11 to 20 not 21)
         // Or lower than the test size
         for (int j=i; j < i+windowSize && j <= testSize; j++) {
-            
-            cout << "J steps: " << j << endl;
+            // Debug J steps
+            //cout << "J steps: " << j << endl;
             
             // Get the data from the database
             data = database.getData(to_string(j));
@@ -326,10 +348,13 @@ void findAnomalies(int windowSize, int threshold, Redis &database, Postgre &post
             covariances = JSON::compose(covariances_a);
 
             // Debug
-            cout << "Covariances: " << covariances << endl;
+            //cout << "Covariances: " << covariances << endl;
 
             // Upload the covariances to the database
             postgre.postData("covariances", k, covariances);
+        
+            // Verify the anomalies
+            verifyAnomalies(matrix_a, means_p, threshold);
         }
 
         // Swtich the matrices and vectors
