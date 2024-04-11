@@ -12,7 +12,7 @@
       - [Redis](#redis)
       - [Postgresql](#postgresql)
     - [Statistics](#statistics)
-  - [Anomaly Detector](#anomaly-detector)
+    - [Anomaly Detector](#anomaly-detector)
   - [License](#license)
 
 ## Introduction
@@ -131,7 +131,7 @@ The class has the following methods:
 - `static double covariance(vector<double>& actual, vector<double>& precedent, double m_act, double m_prec)`: calculates the covariance of two vectors of doubles;
 - `static vector<double> calculateDistance(vector<vector<double>>& values_a, vector<double>& mean_p)` : calculates the distance of the values from the mean.
 
-## Anomaly Detector
+### Anomaly Detector
 
 The anomaly detector is the main component of the project, it calculates the mean value of each stream and the covariance of the set of streams (seen as a multivariate time series) over a time window of configurable amplitude W. Whenever one of the mean values or covariances deviates significantly from the current values, an alarm is triggered.
 
