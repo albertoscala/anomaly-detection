@@ -12,7 +12,8 @@
       - [Redis](#redis)
       - [Postgresql](#postgresql)
     - [Statistics](#statistics)
-    - [Anomaly Detector](#anomaly-detector)
+    - [Json](#json)
+    - [Anomaly Detection](#anomaly-detection-1)
   - [License](#license)
 
 ## Introduction
@@ -131,9 +132,24 @@ The class has the following methods:
 - `static double covariance(vector<double>& actual, vector<double>& precedent, double m_act, double m_prec)`: calculates the covariance of two vectors of doubles;
 - `static vector<double> calculateDistance(vector<vector<double>>& values_a, vector<double>& mean_p)` : calculates the distance of the values from the mean.
 
-### Anomaly Detector
+### Json
 
-The anomaly detector is the main component of the project, it calculates the mean value of each stream and the covariance of the set of streams (seen as a multivariate time series) over a time window of configurable amplitude W. Whenever one of the mean values or covariances deviates significantly from the current values, an alarm is triggered.
+The Json component is a simple library that helps to parse and serialize json data. It was created to simplify the usage of the postgresql database that allows to store and query on json data.
+
+It is a class based library called `Json` and only contains static methods.
+
+The class has the following methods:
+
+- `static string compose(vector<double> values)`: it create a json string from a vector of doubles;
+- `static vector<double> decompose(string json)`: it creates a vector of doubles from a json string.
+
+### Anomaly Detection
+
+The anomaly detector is the main component of the project. It's the `anomaly-detection.cpp` file that contains the main function and the main loop of the project.
+
+It puts all the components together and makes the system work.
+
+It also has support fuctions to prepare data for the various components of the system.
 
 ## License
 
