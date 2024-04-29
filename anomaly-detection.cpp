@@ -25,16 +25,18 @@ const string tables_queries[n_tables] = {
 // Struct to store the anomalies
 struct Anomaly {
     int window;
-    int sensor;
-    bool meanAnomaly;
-    bool covarianceAnomaly;
+    int meanAnomaly;
+    int covarianceAnomaly;
 };
 
 // Get the window size from the command line
 int getWindowSize(int argc, char **argv);
 
-// Get the threshold from the command line
-double getThreshold(int argc, char **argv);
+// Get the mean threshold from the command line
+double getThresholdMean(int argc, char **argv);
+
+// Get the covariance threshold from the command line
+double getThresholdCovariance(int argc, char **argv);
 
 // Setup the tables in the database
 // Check if they exists and flush them
@@ -54,10 +56,13 @@ vector<double> covarianceComputation(vector<vector<double>>& matrix_p, vector<ve
 bool uploadData(Postgre& postgre, string table, int timestamp, string json_data);
 
 // Function to verify the anomalies
-void verifyAnomalies(vector<vector<double>>& matrix_a, vector<double>& means, double threshold);
+void verifyAnomalies(int win_id, vector<vector<double>>& matrix_a, vector<double>& means, vector<double>& covariances, double threshold_m, double threshold_c, vector<struct Anomaly>& anomalies);
 
 // Find the anomaly give a dataset, window size and a threshold
-void findAnomalies(int windowSize, double threshold, Redis &database, Postgre &postgre, int testSize);
+vector<Anomaly> findAnomalies(int windowSize, double threshold_m, double threshold_c, Redis &database, Postgre &postgre, int testSize);
+
+// Function to display the results of the analysis
+void displayResults(vector<Anomaly>& anomalies);
 
 // Main function
 int main(int argc, char **argv) {
@@ -67,10 +72,15 @@ int main(int argc, char **argv) {
     
     cout << "Window size: " << windowSize << endl;
 
-    // Get the threshold from the command line
-    double threshold = getThreshold(argc, argv);
+    // Get the mean threshold from the command line
+    double threshold_m = getThresholdMean(argc, argv);
 
-    cout << "Threshold: " << threshold << endl;
+    cout << "Threshold Mean: " << threshold_m << endl;
+
+    // Get the covariance threshold from the command line
+    double threshold_c = getThresholdCovariance(argc, argv);
+
+    cout << "Threshold Covariance: " << threshold_c << endl;
 
     // Create redis object
     Redis database = Redis("localhost", 6379);
@@ -108,7 +118,10 @@ int main(int argc, char **argv) {
     tableSetup(postgre);
 
     // Find anomalies
-    findAnomalies(windowSize, threshold, database, postgre, testGenerator.getTestSize());
+    vector<Anomaly> anomalies = findAnomalies(windowSize, threshold_m, threshold_c, database, postgre, testGenerator.getTestSize());
+
+    // Display anomalies
+    displayResults(anomalies);
 
     // End of the program
     return 0;
@@ -129,8 +142,8 @@ int getWindowSize(int argc, char **argv) {
     return windowSize;
 }
 
-// Get the threshold from the command line
-double getThreshold(int argc, char **argv) {
+// Get the mean threshold from the command line
+double getThresholdMean(int argc, char **argv) {
     
     // Default threshold
     double threshold = 0.3;
@@ -139,6 +152,21 @@ double getThreshold(int argc, char **argv) {
     if (argc > 2) {
         // Convert the string to an integer
         threshold = stod(argv[2]);
+    }
+
+    return threshold;
+}
+
+// Get the covariance threshold from the command line
+double getThresholdCovariance(int argc, char **argv) {
+    
+    // Default threshold
+    double threshold = 0.3;
+    
+    // Check if threshold is provided as a command line argument
+    if (argc > 3) {
+        // Convert the string to an integer
+        threshold = stod(argv[3]);
     }
 
     return threshold;
@@ -252,33 +280,52 @@ vector<double> covarianceComputation(vector<vector<double>>& matrix_p, vector<ve
 }
 
 // Function to verify the anomalies
-void verifyAnomalies(vector<vector<double>>& matrix_a, vector<double>& means, double threshold, vector<struct Anomaly>& anomalies) {
+void verifyAnomalies(int win_id, vector<vector<double>>& matrix_a, vector<double>& means, vector<double>& covariances, double threshold_m, double threshold_c, vector<struct Anomaly>& anomalies) {
     // Create a vector to store the distances
     vector<double> distances_means;
 
     // Calculate the distances
     distances_means = Statistics::calculateMeanDistance(matrix_a, means);
 
+    // Create a variable to store the anomaly
     struct Anomaly anomaly;
+
+    // Initialize the anomaly
+    anomaly.window = -1;
+    anomaly.meanAnomaly = 0;
+    anomaly.covarianceAnomaly = 0;
 
     // Set the for loop to verify the mean anomalies
     for (int i=0; i<distances_means.size(); i++) {
         // Check if the distance is greater than the threshold
-        if (abs(distances_means[i]) > threshold) {
+        if (abs(distances_means[i]) > threshold_m) {
             // Report the anomaly
-            cout << "Anomaly detected at sensor " << i << " with distance " << distances_means[i] << endl;
+            // Debug
+            //cout << "Anomaly detected at sensor " << i << " with distance " << distances_means[i] << endl;
+            anomaly.window = win_id;
+            anomaly.meanAnomaly++;
         }
     }
 
     // Set the for loop to verify the covariance anomalies
-    //TODO: Implement the covariance anomalies
+    for (int i=0; i<covariances.size(); i++) {
+        // Check if the covariance is greater than the threshold
+        if (abs(covariances[i]) > threshold_c) {
+            // Report the anomaly
+            // Debug
+            //cout << "Anomaly detected at sensor " << i << " with covariance " << covariances[i] << endl;
+            anomaly.window = win_id;
+            anomaly.covarianceAnomaly++;
+        }
+    }
 
     // Add the anomaly to the vector
-    anomalies.push_back(anomaly);
+    if (anomaly.window != -1)
+        anomalies.push_back(anomaly);
 }
 
 // Find the anomaly give a dataset, window size and a threshold
-void findAnomalies(int windowSize, double threshold, Redis &database, Postgre &postgre, int testSize) {
+vector<Anomaly> findAnomalies(int windowSize, double threshold_m, double threshold_c, Redis &database, Postgre &postgre, int testSize) {
     // Create the vectors to store the anomalies
     vector<struct Anomaly> anomalies;
     
@@ -317,7 +364,7 @@ void findAnomalies(int windowSize, double threshold, Redis &database, Postgre &p
         // Check if the matrix is clear
         if (!matrix_a.empty()) {
             cerr << "Error: Matrix is not empty." << endl;
-            return;
+            exit(1);
         }
 
         // Set the for loop to retrive the data from redis
@@ -350,7 +397,8 @@ void findAnomalies(int windowSize, double threshold, Redis &database, Postgre &p
         // Encode the mean values in JSON
         means = JSON::compose(means_a);
 
-        // cout << "Means: " << means << endl;
+        // Debug
+        //cout << "Means: " << means << endl;
 
         // Upload the means and covariances to the database
         postgre.postData("means", k, means);
@@ -373,7 +421,7 @@ void findAnomalies(int windowSize, double threshold, Redis &database, Postgre &p
             postgre.postData("covariances", k, covariances);
         
             // Verify the anomalies
-            verifyAnomalies(matrix_a, means_p, threshold, anomalies);
+            verifyAnomalies(i, matrix_a, means_p, covariances_a, threshold_m, threshold_c, anomalies);
         }
 
         // Swtich the matrices and vectors
@@ -384,4 +432,24 @@ void findAnomalies(int windowSize, double threshold, Redis &database, Postgre &p
         // Set the precedent means
         means_p = means_a;
     }
+
+    // Return anomalies vector
+    return anomalies;
+}
+
+// Function to display the results of the analysis
+void displayResults(vector<Anomaly>& anomalies) {
+    // Create template for a table
+    cout << "| Window | Mean Anomalies | Covariance Anomalies |" << endl;
+    cout << "|--------|----------------|-----------------------|" << endl;
+
+    // Loop through the anomalies
+    for (Anomaly anomaly : anomalies) {
+        cout << "| " << anomaly.window << "\t | \t\t" << anomaly.meanAnomaly << "\t\t | \t\t\t" << anomaly.covarianceAnomaly << " \t\t|" << endl;
+    }
+
+    // Close the table
+    cout << "|--------|----------------|-----------------------|" << endl;
+
+    // End of the function
 }
