@@ -22,6 +22,14 @@ const string tables_queries[n_tables] = {
     "CREATE TABLE covariances (id INT PRIMARY KEY, data JSON);"     // Query to create the covariances table
 };
 
+// Struct to store the anomalies
+struct Anomaly {
+    int window;
+    int sensor;
+    bool meanAnomaly;
+    bool covarianceAnomaly;
+};
+
 // Get the window size from the command line
 int getWindowSize(int argc, char **argv);
 
@@ -244,14 +252,16 @@ vector<double> covarianceComputation(vector<vector<double>>& matrix_p, vector<ve
 }
 
 // Function to verify the anomalies
-void verifyAnomalies(vector<vector<double>>& matrix_a, vector<double>& means, double threshold) {
+void verifyAnomalies(vector<vector<double>>& matrix_a, vector<double>& means, double threshold, vector<struct Anomaly>& anomalies) {
     // Create a vector to store the distances
     vector<double> distances_means;
 
     // Calculate the distances
-    distances_means = Statistics::calculateDistance(matrix_a, means);
+    distances_means = Statistics::calculateMeanDistance(matrix_a, means);
 
-    // Set the for loop to verify the anomalies
+    struct Anomaly anomaly;
+
+    // Set the for loop to verify the mean anomalies
     for (int i=0; i<distances_means.size(); i++) {
         // Check if the distance is greater than the threshold
         if (abs(distances_means[i]) > threshold) {
@@ -259,10 +269,19 @@ void verifyAnomalies(vector<vector<double>>& matrix_a, vector<double>& means, do
             cout << "Anomaly detected at sensor " << i << " with distance " << distances_means[i] << endl;
         }
     }
+
+    // Set the for loop to verify the covariance anomalies
+    //TODO: Implement the covariance anomalies
+
+    // Add the anomaly to the vector
+    anomalies.push_back(anomaly);
 }
 
 // Find the anomaly give a dataset, window size and a threshold
 void findAnomalies(int windowSize, double threshold, Redis &database, Postgre &postgre, int testSize) {
+    // Create the vectors to store the anomalies
+    vector<struct Anomaly> anomalies;
+    
     // Create a matrix to store the data
     vector<vector<double>> matrix_p;    // Precedent matrix
     vector<vector<double>> matrix_a;    // Actual matrix
@@ -354,7 +373,7 @@ void findAnomalies(int windowSize, double threshold, Redis &database, Postgre &p
             postgre.postData("covariances", k, covariances);
         
             // Verify the anomalies
-            verifyAnomalies(matrix_a, means_p, threshold);
+            verifyAnomalies(matrix_a, means_p, threshold, anomalies);
         }
 
         // Swtich the matrices and vectors

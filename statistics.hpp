@@ -40,8 +40,8 @@ class Statistics {
             return sum / (actual.size() -1);
         }
 
-        // Calculate the Mahalanobis distance
-        static vector<double> calculateDistance(vector<vector<double>>& values_a, vector<double>& mean_p) {
+        // Calculate the distance from the mean and the values
+        static vector<double> calculateMeanDistance(vector<vector<double>>& values_a, vector<double>& mean_p) {
             // Create a vector to store the distances
             vector<vector<double>> distances(values_a.size(), vector<double>(values_a[0].size(), 0.0));
             
@@ -71,6 +71,8 @@ class Statistics {
 
             return distances_means;
         }
+
+        static vector<double> calculateCovarianceDistance(vector<vector<double>>& values_a, vector<double>& mean_p);
 };
 
 #endif // STATISTICS_HPP
