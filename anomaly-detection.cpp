@@ -70,15 +70,21 @@ int main(int argc, char **argv) {
     // Get the window size from the command line
     int windowSize = getWindowSize(argc, argv);
     
+    //TODO: 1st non-functional monitor
+
     cout << "Window size: " << windowSize << endl;
 
     // Get the mean threshold from the command line
     double threshold_m = getThresholdMean(argc, argv);
 
-    cout << "Threshold Mean: " << threshold_m << endl;
+    //TODO: 2nd non-functional monitor
+
+    cout << "Threshold Mean: " << threshold _m << endl;
 
     // Get the covariance threshold from the command line
     double threshold_c = getThresholdCovariance(argc, argv);
+
+    //TODO: 3rd non-functional monitor
 
     cout << "Threshold Covariance: " << threshold_c << endl;
 
@@ -394,6 +400,8 @@ vector<Anomaly> findAnomalies(int windowSize, double threshold_m, double thresho
 
         means_a = meanComputation(matrix_a);
 
+        //TODO: Monitor funzionale 1
+
         // Encode the mean values in JSON
         means = JSON::compose(means_a);
 
@@ -411,6 +419,8 @@ vector<Anomaly> findAnomalies(int windowSize, double threshold_m, double thresho
             // Calculate the covariance
             covariances_a = covarianceComputation(matrix_a, matrix_p, means_a, means_p);
 
+            //TODO: Monitor funzionale 2
+
             // Encode the covariance values in JSON
             covariances = JSON::compose(covariances_a);
 
@@ -422,6 +432,8 @@ vector<Anomaly> findAnomalies(int windowSize, double threshold_m, double thresho
         
             // Verify the anomalies
             verifyAnomalies(i, matrix_a, means_p, covariances_a, threshold_m, threshold_c, anomalies);
+
+            //TODO: Monitor funzionale 3
         }
 
         // Swtich the matrices and vectors

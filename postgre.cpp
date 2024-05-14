@@ -136,3 +136,25 @@ void Postgre::postData(string table, int timestamp, string json_data) {
     // Close the connection
     this->closeConnection();
 }
+
+// Function to insert the message in the database
+void Postgre::postData(string table, string message) {
+    // Create the query to insert data into the table
+    string query = "INSERT INTO " + table + " (log) VALUES ('" + message + "');";
+
+    // Open the connection
+    this->openConnection();
+
+    try {
+        // Execute the query
+        pqxx::work work(*this->connection);
+        work.exec(query);
+        work.commit();
+    } catch (const exception &e) {
+        // Error occurred
+        cerr << e.what() << ": postdata" << endl;
+    }
+
+    // Close the connection
+    this->closeConnection();
+}

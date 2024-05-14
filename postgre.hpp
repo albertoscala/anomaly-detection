@@ -43,6 +43,8 @@ class Postgre {
         // Insert data into a table
         void postData(string table, int timestamp, string json_data);
 
+        // Insert data into a table
+        void postData(string table, string message);
         // Not today ;)
         //string getData(string query);
 };
