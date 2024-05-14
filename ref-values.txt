@@ -1,0 +1,2 @@
+Threshold Mean: 0.001/0.0001
+Threshold Covariance: 0.0001
