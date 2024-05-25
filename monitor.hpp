@@ -5,9 +5,6 @@
 
 using namespace std;
 
-// Schema for the monitor table
-const string MONITOR_TABLE = "CREATE TABLE monitor (id INT AUTO_INCREMENT PRIMARY KEY,log VARCHAR(255));";
-
 // Messages for the monitors
 
 // Functional monitors messages
@@ -51,9 +48,6 @@ class Monitor {
     public:
         // Constructor
         Monitor(string dbname, string user, string password, string hostname, int port);
-
-        // Destructor
-        ~Monitor();
 
         // Functional monitors
         

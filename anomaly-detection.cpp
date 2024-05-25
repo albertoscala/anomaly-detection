@@ -24,11 +24,11 @@ const string tables_queries[n_tables] = {
 };
 
 // Struct to store the anomalies
-struct Anomaly {
-    int window;
-    int meanAnomaly;
-    int covarianceAnomaly;
-};
+//struct Anomaly {
+//    int window;
+//    int meanAnomaly;
+//    int covarianceAnomaly;
+//};
 
 // Get the window size from the command line
 int getWindowSize(int argc, char **argv);

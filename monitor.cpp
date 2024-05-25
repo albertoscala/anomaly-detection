@@ -6,7 +6,7 @@ Monitor::Monitor(string dbname, string user, string password, string hostname, i
     this->postgre = new Postgre(dbname, user, password, hostname, port);
 
     // Create the table for the monitor
-    this->postgre->createTable(MONITOR_TABLE);
+    cout << this->postgre->createTable("CREATE TABLE monitor (id SERIAL PRIMARY KEY,log VARCHAR(255));") << endl;
 }
 
 // Functional monitors

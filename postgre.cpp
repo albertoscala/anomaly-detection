@@ -96,6 +96,9 @@ bool Postgre::createTable(string query) {
     // Open the connection
     this->openConnection();
 
+    cout << "query tabella" << endl;
+    cout << query << endl;
+
     try {
         // Execute the query
         pqxx::work work(*this->connection);
@@ -109,6 +112,9 @@ bool Postgre::createTable(string query) {
 
     // Close the connection
     this->closeConnection();
+
+    //Debug 
+    cout << query << endl;
 
     // Table created correctly
     cout << "Table created" << endl;
