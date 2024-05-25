@@ -11,19 +11,49 @@ Monitor::Monitor(string dbname, string user, string password, string hostname, i
 
 // Functional monitors
 
-void Monitor::meanCalculationMonitor(string message) {
-    // Insert the message into the monitor table
-    this->postgre->postData("monitor", message);
+void Monitor::meanCalculationMonitor(vector<double> mean) {
+    // Check if the mean vector is empty
+    if (mean.empty()) {
+        // Insert the message into the monitor table
+        this->postgre->postData("monitor", MEAN_CALCULATION_MONITOR_NEGATIVE);
+    } else {
+        // Check if the mean vector has the correct size
+        if (mean.size() == 999) {
+            // Insert the message into the monitor table
+            this->postgre->postData("monitor", MEAN_CALCULATION_MONITOR_POSITIVE);
+        } else {
+            // Insert the message into the monitor table
+            this->postgre->postData("monitor", MEAN_CALCULATION_MONITOR_NEGATIVE);
+        }
+    }   
 }
 
-void Monitor::covarianceCalculationMonitor(string message) {
-    // Insert the message into the monitor table
-    this->postgre->postData("monitor", message);
+void Monitor::covarianceCalculationMonitor(vector<double> covariance) {
+    // Check if the covariance vector is empty
+    if (covariance.empty()) {
+        // Insert the message into the monitor table
+        this->postgre->postData("monitor", COVARIANCE_CALCULATION_MONITOR_NEGATIVE);
+    } else {
+        // Check if the covariance vector has the correct size
+        if (covariance.size() == 999) {
+            // Insert the message into the monitor table
+            this->postgre->postData("monitor", COVARIANCE_CALCULATION_MONITOR_POSITIVE);
+        } else {
+            // Insert the message into the monitor table
+            this->postgre->postData("monitor", COVARIANCE_CALCULATION_MONITOR_NEGATIVE);
+        }
+    }
 }
 
-void Monitor::anomalyCalculationMonitor(string message) {
-    // Insert the message into the monitor table
-    this->postgre->postData("monitor", message);
+void Monitor::anomalyCalculationMonitor(vector<Anomaly> anomalies) {
+    // Check if the anomalies vector is allocated
+    if (!anomalies.empty()) {
+        // Insert the message into the monitor table
+        this->postgre->postData("monitor", ANOMALY_CALCULATION_MONITOR_POSITIVE);
+    } else {
+        // Insert the message into the monitor table
+        this->postgre->postData("monitor", ANOMALY_CALCULATION_MONITOR_NEGATIVE);
+    }
 }
 
 // Non-functional monitors
@@ -32,10 +62,10 @@ void Monitor::windowSizeMonitor(int windowSize) {
     // Monitor control
     if (windowSize != 0) {
         // Insert the message into the monitor table
-        this->postgre->postData("monitor", "windowSize monitor test passed");
+        this->postgre->postData("monitor", WINDOW_SIZE_MONITOR_POSITIVE);
     } else {
         // Insert the message into the monitor table
-        this->postgre->postData("monitor", "windowSize monitor test failed");
+        this->postgre->postData("monitor", WINDOW_SIZE_MONITOR_NEGATIVE);
     }
 }
 
@@ -43,10 +73,10 @@ void Monitor::thresholdMeanMonitor(double threshold) {
     // Monitor control
     if (threshold != NULL) {
         // Insert the message into the monitor table
-        this->postgre->postData("monitor", "thresholdMean monitor test passed");
+        this->postgre->postData("monitor", THRESHOLD_MEAN_MONITOR_POSITIVE);
     } else {
         // Insert the message into the monitor table
-        this->postgre->postData("monitor", "thresholdMean monitor test failed");
+        this->postgre->postData("monitor", THRESHOLD_MEAN_MONITOR_NEGATIVE);
     }
 }
 
@@ -54,9 +84,9 @@ void Monitor::thresholdCovarianceMonitor(double threshold) {
     // Monitor control
     if (threshold != NULL) {
         // Insert the message into the monitor table
-        this->postgre->postData("monitor", "thresholdCovariance monitor test passed");
+        this->postgre->postData("monitor", THRESHOLD_COVARIANCE_MONITOR_POSITIVE);
     } else {
         // Insert the message into the monitor table
-        this->postgre->postData("monitor", "thresholdCovariance monitor test failed");
+        this->postgre->postData("monitor", THRESHOLD_COVARIANCE_MONITOR_NEGATIVE);
     }
 }

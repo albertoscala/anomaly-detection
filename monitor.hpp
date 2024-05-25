@@ -9,12 +9,39 @@ using namespace std;
 const string MONITOR_TABLE = "CREATE TABLE monitor (id INT AUTO_INCREMENT PRIMARY KEY,log VARCHAR(255));";
 
 // Messages for the monitors
-const string MEAN_CALCULATION_MONITOR       = "meanCalculation monitor test passed";
-const string COVARIANCE_CALCULATION_MONITOR = "covarianceCalculation monitor test passed";
-const string ANOMALY_CALCULATION_MONITOR    = "anomalyCalculation monitor test passed";
-const string WINDOW_SIZE_MONITOR            = "windowSize monitor test passed";
-const string THRESHOLD_MEAN_MONITOR         = "thresholdMean monitor test passed";
-const string THRESHOLD_COVARIANCE_MONITOR   = "thresholdCovariance monitor test passed";
+
+// Functional monitors messages
+
+// Positive outcome
+const string MEAN_CALCULATION_MONITOR_POSITIVE       = "meanCalculation monitor test passed";
+const string COVARIANCE_CALCULATION_MONITOR_POSITIVE = "covarianceCalculation monitor test passed";
+const string ANOMALY_CALCULATION_MONITOR_POSITIVE    = "anomalyCalculation monitor test passed";
+
+// Negative outcome
+const string MEAN_CALCULATION_MONITOR_NEGATIVE       = "meanCalculation monitor test failed";
+const string COVARIANCE_CALCULATION_MONITOR_NEGATIVE = "covarianceCalculation monitor test failed";
+const string ANOMALY_CALCULATION_MONITOR_NEGATIVE    = "anomalyCalculation monitor test failed";
+
+
+// Non-functional monitors messages
+
+// Positive outcome
+const string WINDOW_SIZE_MONITOR_POSITIVE           = "windowSize monitor test passed";
+const string THRESHOLD_MEAN_MONITOR_POSITIVE        = "thresholdMean monitor test passed";
+const string THRESHOLD_COVARIANCE_MONITOR_POSITIVE  = "thresholdCovariance monitor test passed";
+
+// Negative outcome
+const string WINDOW_SIZE_MONITOR_NEGATIVE           = "windowSize monitor test failed";
+const string THRESHOLD_MEAN_MONITOR_NEGATIVE        = "thresholdMean monitor test failed";
+const string THRESHOLD_COVARIANCE_MONITOR_NEGATIVE  = "thresholdCovariance monitor test failed";
+
+// Utility struct
+// Struct to store the anomalies
+struct Anomaly {
+    int window;
+    int meanAnomaly;
+    int covarianceAnomaly;
+};
 
 // Monitor class
 class Monitor {
@@ -30,11 +57,11 @@ class Monitor {
 
         // Functional monitors
         
-        void meanCalculationMonitor(string message);
+        void meanCalculationMonitor(vector<double> mean);
 
-        void covarianceCalculationMonitor(string message);
+        void covarianceCalculationMonitor(vector<double> covariance);
 
-        void anomalyCalculationMonitor(string message);
+        void anomalyCalculationMonitor(vector<Anomaly> anomalies);
 
         // Non-functional monitors
         

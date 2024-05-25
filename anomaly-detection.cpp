@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
 
     //TODO: 2nd non-functional monitor
 
-    cout << "Threshold Mean: " << threshold _m << endl;
+    cout << "Threshold Mean: " << threshold_m << endl;
 
     // Get the covariance threshold from the command line
     double threshold_c = getThresholdCovariance(argc, argv);
@@ -432,8 +432,6 @@ vector<Anomaly> findAnomalies(int windowSize, double threshold_m, double thresho
         
             // Verify the anomalies
             verifyAnomalies(i, matrix_a, means_p, covariances_a, threshold_m, threshold_c, anomalies);
-
-            //TODO: Monitor funzionale 3
         }
 
         // Swtich the matrices and vectors
@@ -444,6 +442,8 @@ vector<Anomaly> findAnomalies(int windowSize, double threshold_m, double thresho
         // Set the precedent means
         means_p = means_a;
     }
+
+    //TODO: Monitor funzionale 3
 
     // Return anomalies vector
     return anomalies;
