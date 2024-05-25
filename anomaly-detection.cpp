@@ -7,6 +7,7 @@
 #include "csv.hpp"
 #include "json.hpp"
 #include <cmath>
+#include "monitor.hpp"
 
 using namespace std;
 
@@ -64,27 +65,32 @@ vector<Anomaly> findAnomalies(int windowSize, double threshold_m, double thresho
 // Function to display the results of the analysis
 void displayResults(vector<Anomaly>& anomalies);
 
+Monitor monitor = Monitor("anomaly_detection", "albys", "12", "127.0.0.1", 5432);
+
 // Main function
 int main(int argc, char **argv) {
     
     // Get the window size from the command line
     int windowSize = getWindowSize(argc, argv);
     
-    //TODO: 1st non-functional monitor
+    // 1st non-functional monitor
+    monitor.windowSizeMonitor(windowSize);
 
     cout << "Window size: " << windowSize << endl;
 
     // Get the mean threshold from the command line
     double threshold_m = getThresholdMean(argc, argv);
 
-    //TODO: 2nd non-functional monitor
+    // 2nd non-functional monitor
+    monitor.thresholdMeanMonitor(threshold_m);
 
     cout << "Threshold Mean: " << threshold_m << endl;
 
     // Get the covariance threshold from the command line
     double threshold_c = getThresholdCovariance(argc, argv);
 
-    //TODO: 3rd non-functional monitor
+    // 3rd non-functional monitor
+    monitor.thresholdCovarianceMonitor(threshold_c);
 
     cout << "Threshold Covariance: " << threshold_c << endl;
 
@@ -400,7 +406,8 @@ vector<Anomaly> findAnomalies(int windowSize, double threshold_m, double thresho
 
         means_a = meanComputation(matrix_a);
 
-        //TODO: Monitor funzionale 1
+        // 1st functional monitor
+        monitor.meanCalculationMonitor(means_a);
 
         // Encode the mean values in JSON
         means = JSON::compose(means_a);
@@ -419,7 +426,8 @@ vector<Anomaly> findAnomalies(int windowSize, double threshold_m, double thresho
             // Calculate the covariance
             covariances_a = covarianceComputation(matrix_a, matrix_p, means_a, means_p);
 
-            //TODO: Monitor funzionale 2
+            // 2nd functional monitor
+            monitor.covarianceCalculationMonitor(covariances_a);
 
             // Encode the covariance values in JSON
             covariances = JSON::compose(covariances_a);
@@ -443,7 +451,8 @@ vector<Anomaly> findAnomalies(int windowSize, double threshold_m, double thresho
         means_p = means_a;
     }
 
-    //TODO: Monitor funzionale 3
+    // 3rd functional monitor
+    monitor.anomalyCalculationMonitor(anomalies);
 
     // Return anomalies vector
     return anomalies;
