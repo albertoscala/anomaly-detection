@@ -8,6 +8,14 @@ using namespace std;
 // Schema for the monitor table
 const string MONITOR_TABLE = "CREATE TABLE monitor (id INT AUTO_INCREMENT PRIMARY KEY,log VARCHAR(255));";
 
+// Messages for the monitors
+const string MEAN_CALCULATION_MONITOR       = "meanCalculation monitor test passed";
+const string COVARIANCE_CALCULATION_MONITOR = "covarianceCalculation monitor test passed";
+const string ANOMALY_CALCULATION_MONITOR    = "anomalyCalculation monitor test passed";
+const string WINDOW_SIZE_MONITOR            = "windowSize monitor test passed";
+const string THRESHOLD_MEAN_MONITOR         = "thresholdMean monitor test passed";
+const string THRESHOLD_COVARIANCE_MONITOR   = "thresholdCovariance monitor test passed";
+
 // Monitor class
 class Monitor {
     private:
