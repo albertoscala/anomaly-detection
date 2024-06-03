@@ -5,8 +5,18 @@ Monitor::Monitor(string dbname, string user, string password, string hostname, i
     // Create the Postgre object
     this->postgre = new Postgre(dbname, user, password, hostname, port);
 
-    // Create the table for the monitor
-    cout << this->postgre->createTable("CREATE TABLE monitor (id SERIAL PRIMARY KEY,log VARCHAR(255));") << endl;
+    // Create the table for the monitor or flush it if it already exists
+    if (!this->postgre->tableExists("monitor")) {
+            // Create the table
+            cout << "Table monitor does not exist." << endl;
+            cout << "Creating table monitor..." << endl;
+            this->postgre->createTable("CREATE TABLE monitor (id SERIAL PRIMARY KEY,log VARCHAR(255));");
+        } else {
+            // Flush/Clean the table
+            cout << "Table monitor exists." << endl;
+            cout << "Flushing table monitor..." << endl;
+            this->postgre->flushTable("monitor");
+        }
 }
 
 // Functional monitors
@@ -71,7 +81,7 @@ void Monitor::windowSizeMonitor(int windowSize) {
 
 void Monitor::thresholdMeanMonitor(double threshold) {
     // Monitor control
-    if (threshold != NULL) {
+    if (threshold) {
         // Insert the message into the monitor table
         this->postgre->postData("monitor", THRESHOLD_MEAN_MONITOR_POSITIVE);
     } else {
@@ -82,7 +92,7 @@ void Monitor::thresholdMeanMonitor(double threshold) {
 
 void Monitor::thresholdCovarianceMonitor(double threshold) {
     // Monitor control
-    if (threshold != NULL) {
+    if (threshold) {
         // Insert the message into the monitor table
         this->postgre->postData("monitor", THRESHOLD_COVARIANCE_MONITOR_POSITIVE);
     } else {

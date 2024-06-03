@@ -151,6 +151,12 @@ int getWindowSize(int argc, char **argv) {
         windowSize = atoi(argv[1]);
     }
 
+    // Check if the window size is greater than 0
+    if (windowSize < 1) {
+        cerr << "Error: window size must be greater than 0." << endl;
+        exit(1);
+    }
+
     return windowSize;
 }
 
@@ -365,13 +371,17 @@ vector<Anomaly> findAnomalies(int windowSize, double threshold_m, double thresho
 
     // Start getting the data from the database
 
+    cout << "Starting the analysis..." << endl;
+
     // Setting the for loop for the window
     for (int i=1, k=1; i <= testSize; i+=windowSize, k++) {
         // Debug I steps
-        //cout << "I steps: " << i << endl;
+        cout << "I steps: " << i << endl;
 
         // Clear the matrix for the new window
         matrix_a.clear();
+
+        cout << "Matrix cleared" << endl;
 
         // Check if the matrix is clear
         if (!matrix_a.empty()) {
@@ -379,12 +389,14 @@ vector<Anomaly> findAnomalies(int windowSize, double threshold_m, double thresho
             exit(1);
         }
 
+        cout << "Matrix is empty" << endl;
+
         // Set the for loop to retrive the data from redis
         // Lower than the window size + i (for example 10+1=11 to 20 not 21)
         // Or lower than the test size
         for (int j=i; j < i+windowSize && j <= testSize; j++) {
             // Debug J steps
-            //cout << "J steps: " << j << endl;
+            cout << "J steps: " << j << endl;
             
             // Get the data from the database
             data = database.getData(to_string(j));

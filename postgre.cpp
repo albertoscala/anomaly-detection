@@ -96,8 +96,9 @@ bool Postgre::createTable(string query) {
     // Open the connection
     this->openConnection();
 
-    cout << "query tabella" << endl;
-    cout << query << endl;
+    // Debug
+    //cout << "query tabella" << endl;
+    //cout << query << endl;
 
     try {
         // Execute the query
